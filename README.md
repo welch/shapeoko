@@ -13,8 +13,8 @@ shapeoko commandline utilities. run with --help option for more info.
 
 lib/
 ----
-- grblstuff: library for chatting with the grbl.
-- getch: get a keypress
+- grblstuff.py: library for chatting with the grbl.
+- getch.py: get a keypress
 
 data/
 ----
