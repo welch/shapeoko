@@ -1,0 +1,70 @@
+#!/usr/bin/env python 
+#
+# gcat: transmit gcode files to grbl on an arduino via a usb serial
+# connection on OSX.
+#
+import sys
+import os.path
+from optparse import OptionParser
+import logging
+# path hack so we can import from sibling lib directory. 
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from lib.grblstuff import hello_grbl, do_command, wait_motion, setup_logging
+
+def log(logger='gcat'):
+    return logging.getLogger(logger)
+
+def main():
+
+    parser = OptionParser(usage="""
+    %prog [options] [gcode-file-path...]
+
+    Transmit gcode files to the grbl device at /dev/tty.usbmodem*.
+    You may specify a list of file paths or provide gcode on stdin.
+
+    Prior to any transmission, settings for grbl will be read from
+    ./grbl.conf or /usr/local/etc/grbl.conf if these exist and are not
+    overridden by the --conf or --noconf options.
+    """)
+    parser.add_option("--dev", default = "/dev/tty.usbmodem*",
+                      help="filepath pattern for grbl serial device"),
+    parser.add_option("-c", "--conf", 
+                      help="config file to send to grbl at startup")
+    parser.add_option("-n", "--noconf", action="store_true",
+                      help="send no configuration to grble at startup")
+    parser.add_option("-v", "--verbose", action="store_true",
+                      help="log grbl input and output")
+    parser.add_option("-L", "--logfile", default=None,
+                      help="send log stream to this file (default stderr)")
+    parser.add_option("--settings", action="store_true",
+                      help="display grbl settings, suitable for your conf file")
+    (opts, args) = parser.parse_args()
+
+    setup_logging(info=opts.verbose, path=opts.logfile)
+    conf = opts.conf
+    if not conf and not opts.noconf:
+        if os.path.exists("grbl.conf"):
+            conf = "grbl.conf"
+        elif os.path.exists("/usr/local/etc/grbl.conf"):
+            conf = "/usr/local/etc/grbl.conf"
+    grbl = hello_grbl(opts.dev, conf)
+    if not grbl:
+        sys.exit(0)
+    if opts.settings:
+        settings = do_command(grbl, "$")
+        print settings
+    if len(args):
+        for path in args:
+            for line in open(path, "r"):
+                do_command(grbl, line)
+    else:
+        log().info("reading stdin...")
+        for line in sys.stdin:
+            do_command(grbl, line)
+    wait_motion(grbl)
+    grbl.close()
+    log().info("done!")
+
+if __name__ == "__main__":
+    sys.exit(main())
+

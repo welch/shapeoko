@@ -1,0 +1,22 @@
+G-codes supported by GRBL:
+
+G-code	Meaning	Notes
+G0/G00	Switch to rapid linear motion mode (seek)	Used to get the tool somewhere quickly without cutting
+G1/G01	Switch to linear motion at the current feed rate	Used to cut a straight line
+G2/G02	Switch to clockwise arc mode	
+G3/G03	Switch to anti-clockwise arc mode	
+G4/G04	Dwell (pause)	
+G17	Select the XY plane (for arcs)	
+G18	Select the XZ plane (for arcs)	
+G19	Select the YZ plane (for arcs)	
+G20	After this, units will be in inches	Best practice: do this at the start of a program and nowhere else
+G21	After this, units will be in mm	Best practice: do this at the start of a program and nowhere else
+G28	Return to home position	(to-do: compare with G30)
+G30	Return to home position	(to-do: compare with G28)
+G90	Switch to absolute distance mode	Coords are now relative to the origin of the currently active coordinate system (to-do: explain!)
+G91	Switch to incremental distance mode	Coords are now relative to the current position
+G92	Change the current coordinates without moving	e.g. "G92 x0 y0 z0" makes the current position the home position
+G93	Set inverse time feed rate mode	(to-do: find out what that means)
+G94	Set units per minute feed rate mode	(to-do: find out what that means)
+
+examples:
