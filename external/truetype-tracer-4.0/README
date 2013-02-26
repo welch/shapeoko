@@ -1,0 +1,11 @@
+Example usages:
+
+ttt 'Hello world!' > helloworld.ngc
+ttt_dxf 'Hello world!' > helloworld.dxf
+ttt -f /usr/share/fonts/truetype/ttf-bitstream-vera/VeraIt.ttf 'Hello!' > h.ngc
+
+Notes:
+
+linescale (-l) causes outlines to be filled with linear hatching.  24
+is the minimum value == maximum spacing, renders with space between
+lines for fine dry erase, 64 is nearly solid fill with fine dry erase.
