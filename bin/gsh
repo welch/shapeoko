@@ -42,6 +42,8 @@ def main():
                       help="send log stream to this file (default stderr)")
     parser.add_option("--settings", action="store_true",
                       help="display grbl settings, suitable for your conf file")
+    parser.add_option("--penup", action="store_true", 
+                      help="raise the pen as the first (or only) action")
     (opts, args) = parser.parse_args()
 
     setup_logging(info=opts.verbose, path=opts.logfile)
@@ -57,6 +59,8 @@ def main():
     if opts.settings:
         settings = do_command(grbl, "$")
         print settings
+    if opts.penup:
+        do_command(grbl, "G01 Z10", wait=True)
     if len(args):
         for command in " ".join(args).split(","):
             do_command(grbl, command)

@@ -9,7 +9,11 @@ from optparse import OptionParser
 import logging
 # path hack so we can import from sibling lib directory. 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from lib.grblstuff import hello_grbl, do_command, wait_motion, setup_logging
+from lib.grblstuff import hello_grbl, do_command, wait_motion, setup_logging,\
+    pen_up
+#from lib.grblstuff import command_bounds, scale_commands, clip_commands
+
+
 
 def log(logger='gcat'):
     return logging.getLogger(logger)
@@ -38,6 +42,10 @@ def main():
                       help="send log stream to this file (default stderr)")
     parser.add_option("--settings", action="store_true",
                       help="display grbl settings, suitable for your conf file")
+    parser.add_option("--bbox", default="0,0,4,4",
+                      help="clip all supplied coords to xmin,ymin,xmax,ymax")
+    parser.add_option("--noauto", action="store_true",
+                      help="don't autoscale to fill the bounding box")
     (opts, args) = parser.parse_args()
 
     setup_logging(info=opts.verbose, path=opts.logfile)
@@ -53,15 +61,28 @@ def main():
     if opts.settings:
         settings = do_command(grbl, "$")
         print settings
+    #
+    # collect all input into a buffer for scaling
+    #
     if len(args):
+        lines = []
         for path in args:
-            for line in open(path, "r"):
-                do_command(grbl, line)
+            lines.extend(open(path, "r").readlines())
     else:
         log().info("reading stdin...")
-        for line in sys.stdin:
+        lines = sys.stdin.readlines()
+    bbox = [int(x) for x in opts.bbox.split(",")]
+    try:
+        for line in lines:
             do_command(grbl, line)
+    except KeyboardInterrupt:
+        # reset and penup
+        log().critical("Interrupt!")
+        grbl.close() 
+        grbl = hello_grbl(opts.dev, conf)
+        pen_up(grbl)
     wait_motion(grbl)
+    pen_up(grbl)
     grbl.close()
     log().info("done!")
 

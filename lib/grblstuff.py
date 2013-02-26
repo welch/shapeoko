@@ -105,8 +105,8 @@ def wait_motion(grbl):
     #
     # the gcode dwell command as implemented by grbl includes a
     # stepper-motor sync prior to beginning the dwell countdown.
-    #
-    do_command(grbl, "G4 P0", wait=False) 
+    # use it to force a pause-until-caught-up.
+    do_command(grbl, "G4 P0") 
 
 def set_home(grbl):
     """
@@ -120,6 +120,12 @@ def go_home(grbl):
     move to 0,0,0
     """
     do_command(grbl, "G0 x0 y0 z0")
+    
+def pen_up(grbl):
+    """
+    raise the pen a bit
+    """
+    do_command(grbl, "G01 Z10")
     
 def hello_grbl(serial_dev_pattern=None, conf_path=None):
     """
